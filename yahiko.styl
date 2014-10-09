@@ -1,0 +1,129 @@
+/**
+ * ==============================================================
+ * Yahiko
+ * ==============================================================
+ */
+
+@import 'nib'
+
+$size        = 50px
+$angle       = 40deg
+$angleHover  = 30deg
+$angleActive = 25deg
+
+arrowTransform( $angle, $x, $y )
+    i:first-child
+        transform translate( $x, $y ) rotate( $angle )
+
+    i:last-child
+        transform translate( $x, - $y ) rotate( - $angle )
+
+.yahiko
+    width 100%
+    height 100%
+    position relative
+    overflow hidden
+
+    &__stage 
+        top 0
+        left 0
+        width 100%
+        height 100%
+        position absolute
+    
+    &__inner 
+        position relative
+        height 100%
+    
+    &__tracker
+        left 0
+        transform translateX(0)
+        height 100%
+        position relative
+
+    &__item 
+        float left
+        background-size cover
+        background-position center
+        height 100%
+    
+    &__nav 
+        width 12%
+        position absolute
+        height 100%
+        top 0
+        cursor pointer
+        z-index 1002
+        display none
+    
+    &__precontainer 
+        top 0
+        position absolute
+        width 12%
+        overflow hidden
+        z-index 1001
+        height 100%
+    
+    &__next 
+        right 0
+    
+    &__prev 
+        left 0
+
+    &__paginate
+        margin 10px
+        width $size
+        height $size
+        cursor pointer
+        background none
+        border 0
+        outline 0
+        opacity 0.7
+        transform translate3d( 0, 0, 0 )
+        position absolute
+        top 50%
+        margin-top -20px
+
+        i
+            position absolute
+            top 40%
+            left 0
+            width $size
+            height 3px
+            border-radius 3px
+            background #fff
+            transition all 0.15s ease
+
+    &__left
+        right 50%
+        margin-right -25px
+        arrowTransform( $angle, 0, -1px )
+
+        &:hover
+            arrowTransform( $angleHover, 0, -1px )
+
+        &:active
+            arrowTransform( $angleActive, 0, -1px )
+
+        i
+            transform-origin 0% 50%
+
+    &__right
+        left 50%
+        margin-left -25px
+        arrowTransform( $angle, 0, 1px )
+
+        i
+            transform-origin 100% 50%
+
+        &:hover
+            arrowTransform( $angleHover, 0, 1px )
+
+        &:active
+            arrowTransform( $angleActive, 0, 1px )
+
+    &__paginate:hover
+        opacity 1
+
+    &__transition
+        transition 0.3s

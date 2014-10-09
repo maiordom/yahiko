@@ -7,17 +7,39 @@
     <link href="yahiko.css" type="text/css" rel="stylesheet">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script type="text/javascript" src="yahiko.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        HTML, BODY {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 
 <body>
 
-<pre>
-<span>/**<br /> * -=== Table Sorter ===-</span>
-<span> * See <a href="http://github.com/maiordom/table-sorter">http://github.com/maiordom/yahiko</a></span>
-<span> */</span>
-</pre>
+<div class="yahiko">
 
-<div class="examples">
+    <div class="yahiko__inner">
+        <div class="yahiko__item" style="background-image: url(images/wallhaven-9897.jpg);"></div>
+        <div class="yahiko__item" style="background-image: url(images/wallhaven-29854.jpg);"></div>
+        <div class="yahiko__item" style="background-image: url(images/wallhaven-8895.jpg);"></div>
+        <div class="yahiko__item" style="background-image: url(images/wallhaven-31241.jpg);"></div>
+        <div class="yahiko__item" style="background-image: url(images/wallhaven-33857.jpg);"></div>
+    </div>
+
+    <div class="yahiko__prev yahiko__nav">
+        <button class="yahiko__paginate yahiko__left"><i></i><i></i></button>
+    </div>
+
+    <div class="yahiko__next yahiko__nav">
+        <button class="yahiko__paginate yahiko__right"><i></i><i></i></button>
+    </div>
+
 </div>
 
 <script type="text/javascript">

@@ -2,24 +2,24 @@
     'use strict';
 
     var defaults = {
-        loop:               false,
-        useThumbs:          true,
-        slideTimeout:       6000,
-        animationTime:      100,
-        preAnimationTime:   100,
-        moveTime:           300,
-        preContainerOffset: 128,
-        el:                 'yahiko',
-        item:               'yahiko__item',
-        thumbs:             'yahiko__thumbs',
-        thumb:              'yahiko__thumb',
-        inner:              'yahiko__inner',
-        tracker:            'yahiko__tracker',
-        navNext:            'yahiko__next',
-        navPrev:            'yahiko__prev',
-        itemActive:         'yahiko__active',
-        preContainer:       'yahiko__precontainer',
-        stage:              'yahiko__stage'
+        loop:             false,
+        useThumbs:        false,
+        slideTimeout:     6000,
+        animationTime:    100,
+        preAnimationTime: 100,
+        moveTime:         300,
+        el:               'yahiko',
+        item:             'yahiko__item',
+        thumbs:           'yahiko__thumbs',
+        thumb:            'yahiko__thumb',
+        inner:            'yahiko__inner',
+        tracker:          'yahiko__tracker',
+        navNext:          'yahiko__next',
+        navPrev:          'yahiko__prev',
+        itemActive:       'yahiko__active',
+        preContainer:     'yahiko__precontainer',
+        stage:            'yahiko__stage',
+        transition:       'yahiko__transition'
     };
 
     function Yahiko( $el, options ) {
@@ -35,6 +35,7 @@
     Yahiko.prototype = {
         init: function( $el, options ) {
             this.index = 0;
+            this.has3d = this.has3d();
             this.cacheObjects( $el, options );
             this.numerateItems();
             this.initThumbs();
@@ -49,6 +50,101 @@
             this.setCurrIndex( 0 );
             this.triggerSelectItem( this.index );
             this.setInitalHeight();
+        },
+
+        getPrefixed: function( prop ) {
+            var i, s = document.createElement( 'p' ).style,
+                v = [ 'ms','O','Moz','Webkit' ];
+
+            if( s[ prop ] == '' ) {
+                return prop;
+            }
+
+            prop = prop.charAt( 0 ).toUpperCase() + prop.slice( 1 );
+
+            for ( i = v.length; i--; ) {
+                if ( s[ v[ i ] + prop ] == '' ) {
+                    return ( v[ i ] + prop );
+                }
+            }
+        },
+
+        has3d: function() {
+            var el = document.createElement( 'p' ),
+                has3d,
+                transforms = {
+                    'webkitTransform': '-webkit-transform',
+                    'OTransform': '-o-transform',
+                    'msTransform': '-ms-transform',
+                    'MozTransform': '-moz-transform',
+                    'transform': 'transform'
+                };
+
+            document.body.insertBefore( el, null );
+
+            for ( var t in transforms ) {
+                if ( el.style[ t ] !== undefined ) {
+                    el.style[ t ] = 'translate3d(1px,1px,1px)';
+                    has3d = window.getComputedStyle( el ).getPropertyValue( transforms[ t ] );
+                }
+            }
+
+            document.body.removeChild( el );
+
+            return ( has3d !== undefined && has3d.length > 0 && has3d !== 'none' );
+        },
+
+        addEvent: function( el, e, fn, bool ) {
+            if ( !e ) {
+                return;
+            }
+
+            el.addEventListener ? el.addEventListener( e, fn, !!bool ) : el.attachEvent( 'on' + e, fn );
+        },
+
+        bindTransitionEnd: function( $el ) {
+            var elData = $el.data();
+
+            if ( elData.tEnd ) return;
+
+            var el = $el[ 0 ],
+                transitionEndEvent = {
+                    WebkitTransition: 'webkitTransitionEnd',
+                    MozTransition: 'transitionend',
+                    OTransition: 'oTransitionEnd otransitionend',
+                    msTransition: 'MSTransitionEnd',
+                    transition: 'transitionend'
+                };
+
+            this.addEvent( el, transitionEndEvent[ this.getPrefixed( 'transition' ) ], function( e ) {
+                elData.tProp && e.propertyName.match( elData.tProp ) && elData.onEndFn();
+            });
+
+            elData.tEnd = true;
+        },
+
+        afterTransition: function( $el, property, time, fn ) {
+            var ok,
+                elData = $el.data();
+
+            if ( elData ) {
+                elData.onEndFn = function() {
+                    if ( ok ) {
+                        return;
+                    }
+                    ok = true;
+                    clearTimeout( elData.tT );
+                    fn();
+                };
+
+                elData.tProp = property;
+                clearTimeout( elData.tT );
+                elData.tT = setTimeout( function() {
+                    elData.onEndFn();
+                }, time * 1.5);
+
+                this.bindTransitionEnd( $el );
+            }
         },
 
         cacheObjects: function( $el, options ) {
@@ -139,7 +235,9 @@
         createPreSliders: function() {
             this.$els.appendTo( this.$nullBox );
             this.$preSliders = this.$els.clone().hide();
-            this.$preContainer = $( '<div>' ).addClass( this.options.preContainer ).append( this.$preSliders ).insertAfter( this.$tracker ).hide();
+            this.$preContainer = $( '<div>' ).addClass( this.options.preContainer ).append( this.$preSliders ).insertAfter( this.$tracker );
+            this.options.preContainerOffset = this.$preContainer.width();
+            this.$preContainer.hide();
         },
 
         startTimeout: function() {
@@ -176,24 +274,38 @@
 
         onShowPrevPrePanel: function() {
             if ( this.index > 0 || this.options.loop ) {
-                this.$preContainer.show().css( { left: - this.options.preContainerOffset, right: '' } ).stop().animate( { left: 0 }, this.options.preAnimationTime ).data( 'move', 'left' );
+                this.$preContainer
+                    .show()
+                    .css( { left: - this.options.preContainerOffset, right: '' } )
+                    .stop()
+                    .animate( { left: 0 }, this.options.preAnimationTime )
+                    .data( 'move', 'left' );
+
                 this.$activeSlide && this.$activeSlide.hide();
                 this.$activeSlide = this.$preSliders.eq( this.getPrevIndex() );
-                this.$activeSlide.show().css( { left: - ( this.trackerWidth / 2 - 64 ) } );
+                this.$activeSlide.show().css( { left: - ( this.trackerWidth / 2 - this.options.preContainerOffset / 2 ) } );
             }
         },
 
         onHidePrevPrePanel: function() {
             if ( this.index > 0 || this.options.loop) {
-                this.$preContainer.stop().animate( { left: - this.options.preContainerOffset }, this.options.preAnimationTime, function() {
-                    this.$preContainer.hide();
-                }.bind( this ) );
+                this.$preContainer
+                    .stop()
+                    .animate( { left: - this.options.preContainerOffset }, this.options.preAnimationTime, function() {
+                        this.$preContainer.hide();
+                    }.bind( this ) );
             }
         },
 
         onShowNextPrePanel: function() {
             if ( this.index < this.count || this.options.loop ) {
-                this.$preContainer.show().css( { right: - this.options.preContainerOffset, left: '' } ).stop().animate( { right: 0 }, this.options.preAnimationTime ).data( 'move', 'right' );
+                this.$preContainer
+                    .show()
+                    .css( { right: - this.options.preContainerOffset, left: '' } )
+                    .stop()
+                    .animate( { right: 0 }, this.options.preAnimationTime )
+                    .data( 'move', 'right' );
+
                 this.$activeSlide && this.$activeSlide.hide();
                 this.$activeSlide = this.$preSliders.eq( this.getNextIndex() );
                 this.$activeSlide.show().css( { left: - ( this.trackerWidth / 2 - 64 ) } );
@@ -202,9 +314,11 @@
 
         onHideNextPrePanel: function() {
             if ( this.index < this.count || this.options.loop ) {
-                this.$preContainer.stop().animate( { right: - this.options.preContainerOffset }, this.options.preAnimationTime, function() {
-                    this.$preContainer.hide();
-                }.bind( this ) );
+                this.$preContainer
+                    .stop()
+                    .animate( { right: - this.options.preContainerOffset }, this.options.preAnimationTime, function() {
+                        this.$preContainer.hide();
+                    }.bind( this ) );
             }
         },
 
@@ -247,7 +361,12 @@
 
         onMoveEnd: function() {
             this.$tracker.find( '.' + this.options.item ).appendTo( this.$nullBox );
-            this.$tracker.css( { left: 0 } );
+            if ( this.has3d ) {
+                this.$tracker.removeClass( this.options.transition );
+                this.$tracker[ 0 ].style[ this.getPrefixed( 'transform' ) ] = 'translateX(0)';
+            } else {
+                this.$tracker.removeClass( this.options.transition ).css( { left: 0 } );
+            }
             this.setStage();
             this.isAnimated = false;
         },
@@ -293,12 +412,28 @@
             this.isAnimated = true;
             var directionName = this.$preContainer.data( 'move' ), props = {};
             props[ directionName ] = - this.options.preContainerOffset;
-            this.$tracker.stop().animate( { left: - direction * this.trackerWidth + 'px' }, this.options.moveTime, this.onMoveEnd.bind( this ) );
             this.$preContainer.animate( props, this.options.preAnimationTime );
+
+            if ( this.has3d ) {
+                this.$tracker.addClass( this.options.transition );
+                this.$tracker[ 0 ].style[ this.getPrefixed( 'transform' ) ] = 'translateX(' + - direction * this.trackerWidth + 'px)';
+                this.afterTransition( this.$tracker, 'transition', this.options.moveTime, function() {
+                    this.onMoveEnd();
+                    console.log( 'transitionEnd' );
+                }.bind( this ));
+            } else {
+                this.$tracker
+                    .stop()
+                    .animate(
+                        { left: - direction * this.trackerWidth + 'px' },
+                        this.options.moveTime,
+                        this.onMoveEnd.bind( this )
+                    );
+            }
         },
 
         setInitalHeight: function () {
-            this.$inner.height( this.$els.eq( 0 ).height() );
+            this.$inner.height( this.$el.height() );
         },
 
         setActiveThumb: function( index ) {

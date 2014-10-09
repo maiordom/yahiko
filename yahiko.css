@@ -1,0 +1,216 @@
+/**
+ * ==============================================================
+ * Yahiko
+ * ==============================================================
+ */
+.yahiko {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.yahiko__stage {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.yahiko__inner {
+  position: relative;
+  height: 100%;
+}
+.yahiko__tracker {
+  left: 0;
+  -webkit-transform: translateX(0);
+  -moz-transform: translateX(0);
+  -o-transform: translateX(0);
+  -ms-transform: translateX(0);
+  transform: translateX(0);
+  height: 100%;
+  position: relative;
+}
+.yahiko__item {
+  float: left;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  background-position: center;
+  height: 100%;
+}
+.yahiko__nav {
+  width: 12%;
+  position: absolute;
+  height: 100%;
+  top: 0;
+  cursor: pointer;
+  z-index: 1002;
+  display: none;
+}
+.yahiko__precontainer {
+  top: 0;
+  position: absolute;
+  width: 12%;
+  overflow: hidden;
+  z-index: 1001;
+  height: 100%;
+}
+.yahiko__next {
+  right: 0;
+}
+.yahiko__prev {
+  left: 0;
+}
+.yahiko__paginate {
+  margin: 10px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  outline: 0;
+  opacity: 0.7;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+  filter: alpha(opacity=70);
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  position: absolute;
+  top: 50%;
+  margin-top: -20px;
+}
+.yahiko__paginate i {
+  position: absolute;
+  top: 40%;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background: #fff;
+  -webkit-transition: all 0.15s ease;
+  -moz-transition: all 0.15s ease;
+  -o-transition: all 0.15s ease;
+  -ms-transition: all 0.15s ease;
+  transition: all 0.15s ease;
+}
+.yahiko__left {
+  right: 50%;
+  margin-right: -25px;
+}
+.yahiko__left i:first-child {
+  -webkit-transform: translate(0, -1px) rotate(40deg);
+  -moz-transform: translate(0, -1px) rotate(40deg);
+  -o-transform: translate(0, -1px) rotate(40deg);
+  -ms-transform: translate(0, -1px) rotate(40deg);
+  transform: translate(0, -1px) rotate(40deg);
+}
+.yahiko__left i:last-child {
+  -webkit-transform: translate(0, 1px) rotate(-40deg);
+  -moz-transform: translate(0, 1px) rotate(-40deg);
+  -o-transform: translate(0, 1px) rotate(-40deg);
+  -ms-transform: translate(0, 1px) rotate(-40deg);
+  transform: translate(0, 1px) rotate(-40deg);
+}
+.yahiko__left:hover i:first-child {
+  -webkit-transform: translate(0, -1px) rotate(30deg);
+  -moz-transform: translate(0, -1px) rotate(30deg);
+  -o-transform: translate(0, -1px) rotate(30deg);
+  -ms-transform: translate(0, -1px) rotate(30deg);
+  transform: translate(0, -1px) rotate(30deg);
+}
+.yahiko__left:hover i:last-child {
+  -webkit-transform: translate(0, 1px) rotate(-30deg);
+  -moz-transform: translate(0, 1px) rotate(-30deg);
+  -o-transform: translate(0, 1px) rotate(-30deg);
+  -ms-transform: translate(0, 1px) rotate(-30deg);
+  transform: translate(0, 1px) rotate(-30deg);
+}
+.yahiko__left:active i:first-child {
+  -webkit-transform: translate(0, -1px) rotate(25deg);
+  -moz-transform: translate(0, -1px) rotate(25deg);
+  -o-transform: translate(0, -1px) rotate(25deg);
+  -ms-transform: translate(0, -1px) rotate(25deg);
+  transform: translate(0, -1px) rotate(25deg);
+}
+.yahiko__left:active i:last-child {
+  -webkit-transform: translate(0, 1px) rotate(-25deg);
+  -moz-transform: translate(0, 1px) rotate(-25deg);
+  -o-transform: translate(0, 1px) rotate(-25deg);
+  -ms-transform: translate(0, 1px) rotate(-25deg);
+  transform: translate(0, 1px) rotate(-25deg);
+}
+.yahiko__left i {
+  -webkit-transform-origin: 0% 50%;
+  -moz-transform-origin: 0% 50%;
+  -o-transform-origin: 0% 50%;
+  -ms-transform-origin: 0% 50%;
+  transform-origin: 0% 50%;
+}
+.yahiko__right {
+  left: 50%;
+  margin-left: -25px;
+}
+.yahiko__right i:first-child {
+  -webkit-transform: translate(0, 1px) rotate(40deg);
+  -moz-transform: translate(0, 1px) rotate(40deg);
+  -o-transform: translate(0, 1px) rotate(40deg);
+  -ms-transform: translate(0, 1px) rotate(40deg);
+  transform: translate(0, 1px) rotate(40deg);
+}
+.yahiko__right i:last-child {
+  -webkit-transform: translate(0, -1px) rotate(-40deg);
+  -moz-transform: translate(0, -1px) rotate(-40deg);
+  -o-transform: translate(0, -1px) rotate(-40deg);
+  -ms-transform: translate(0, -1px) rotate(-40deg);
+  transform: translate(0, -1px) rotate(-40deg);
+}
+.yahiko__right i {
+  -webkit-transform-origin: 100% 50%;
+  -moz-transform-origin: 100% 50%;
+  -o-transform-origin: 100% 50%;
+  -ms-transform-origin: 100% 50%;
+  transform-origin: 100% 50%;
+}
+.yahiko__right:hover i:first-child {
+  -webkit-transform: translate(0, 1px) rotate(30deg);
+  -moz-transform: translate(0, 1px) rotate(30deg);
+  -o-transform: translate(0, 1px) rotate(30deg);
+  -ms-transform: translate(0, 1px) rotate(30deg);
+  transform: translate(0, 1px) rotate(30deg);
+}
+.yahiko__right:hover i:last-child {
+  -webkit-transform: translate(0, -1px) rotate(-30deg);
+  -moz-transform: translate(0, -1px) rotate(-30deg);
+  -o-transform: translate(0, -1px) rotate(-30deg);
+  -ms-transform: translate(0, -1px) rotate(-30deg);
+  transform: translate(0, -1px) rotate(-30deg);
+}
+.yahiko__right:active i:first-child {
+  -webkit-transform: translate(0, 1px) rotate(25deg);
+  -moz-transform: translate(0, 1px) rotate(25deg);
+  -o-transform: translate(0, 1px) rotate(25deg);
+  -ms-transform: translate(0, 1px) rotate(25deg);
+  transform: translate(0, 1px) rotate(25deg);
+}
+.yahiko__right:active i:last-child {
+  -webkit-transform: translate(0, -1px) rotate(-25deg);
+  -moz-transform: translate(0, -1px) rotate(-25deg);
+  -o-transform: translate(0, -1px) rotate(-25deg);
+  -ms-transform: translate(0, -1px) rotate(-25deg);
+  transform: translate(0, -1px) rotate(-25deg);
+}
+.yahiko__paginate:hover {
+  opacity: 1;
+  -ms-filter: none;
+  filter: none;
+}
+.yahiko__transition {
+  -webkit-transition: 0.3s;
+  -moz-transition: 0.3s;
+  -o-transition: 0.3s;
+  -ms-transition: 0.3s;
+  transition: 0.3s;
+}
