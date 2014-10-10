@@ -236,7 +236,6 @@
             this.$els.appendTo( this.$nullBox );
             this.$preSliders = this.$els.clone().hide();
             this.$preContainer = $( '<div>' ).addClass( this.options.preContainer ).append( this.$preSliders ).insertAfter( this.$tracker );
-            this.options.preContainerOffset = this.$preContainer.width();
             this.$preContainer.hide();
         },
 
@@ -263,6 +262,7 @@
         },
 
         setSize: function() {
+            this.options.preContainerOffset = this.$preContainer.width();
             this.trackerWidth = this.$el.width();
             this.preContainerCenter = this.trackerWidth / 2 - this.options.preContainerOffset / 2;
             this.$tracker.width( this.trackerWidth );
