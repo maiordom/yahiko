@@ -407,6 +407,7 @@
 
             this.move( this.index, direction );
             this.setActiveDot( this.index );
+            this.displayNavByIndex();
         },
 
         move: function( to, direction ) {
