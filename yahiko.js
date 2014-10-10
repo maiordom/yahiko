@@ -4,6 +4,7 @@
     var defaults = {
         loop:             false,
         useDots:          false,
+        useTimer:         false,
         slideTimeout:     6000,
         preAnimationTime: 150,
         moveTime:         300,
@@ -191,7 +192,7 @@
             if ( this.$els.length > 1 && this.options.useDots ) {
                 this.createDots();
                 this.setActiveDot( 0 );
-                this.startTimeout();
+                this.startTimer();
             }
         },
 
@@ -239,13 +240,18 @@
             this.$preContainer.hide();
         },
 
-        startTimeout: function() {
+        startTimer: function() {
+            if ( !this.options.useTimer ) {
+                return;
+            }
+
             this.timeoutCallback = setTimeout( function TimeoutCallback() {
                 this.setCurrIndex( this.index + 1 );
                 this.triggerSelectItem( this.index );
                 this.move( this.index, 1 );
                 this.setActiveDot( this.index );
-                this.startTimeout();
+                this.displayNavByIndex();
+                this.startTimer();
             }.bind( this ), this.options.slideTimeout );
         },
 
@@ -388,7 +394,7 @@
         },
 
         onMouseLeave: function() {
-            this.startTimeout();
+            this.startTimer();
         },
 
         onDotClick: function( e ) {
