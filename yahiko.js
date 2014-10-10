@@ -3,15 +3,14 @@
 
     var defaults = {
         loop:             false,
-        useThumbs:        false,
+        useDots:          false,
         slideTimeout:     6000,
-        animationTime:    100,
-        preAnimationTime: 100,
+        preAnimationTime: 150,
         moveTime:         300,
         el:               'yahiko',
         item:             'yahiko__item',
-        thumbs:           'yahiko__thumbs',
-        thumb:            'yahiko__thumb',
+        dots:             'yahiko__dots',
+        dot:              'yahiko__dot',
         inner:            'yahiko__inner',
         tracker:          'yahiko__tracker',
         navNext:          'yahiko__next',
@@ -19,7 +18,22 @@
         itemActive:       'yahiko__active',
         preContainer:     'yahiko__precontainer',
         stage:            'yahiko__stage',
-        transition:       'yahiko__transition'
+        transition:       'yahiko__transition',
+        dotCurrent:       'yahiko__dot_current',
+        transforms: {
+            'webkitTransform': '-webkit-transform',
+            'OTransform': '-o-transform',
+            'msTransform': '-ms-transform',
+            'MozTransform': '-moz-transform',
+            'transform': 'transform'
+        },
+        transitionEnd: {
+            WebkitTransition: 'webkitTransitionEnd',
+            MozTransition: 'transitionend',
+            OTransition: 'oTransitionEnd otransitionend',
+            msTransition: 'MSTransitionEnd',
+            transition: 'transitionend'
+        }
     };
 
     function Yahiko( $el, options ) {
@@ -35,13 +49,11 @@
     Yahiko.prototype = {
         init: function( $el, options ) {
             this.index = 0;
-            this.has3d = this.has3d();
             this.cacheObjects( $el, options );
             this.numerateItems();
-            this.initThumbs();
+            this.initDots();
             this.bindEvents();
             this.createTracker();
-            this.getMaxHeight();
             this.displayNav();
             this.createPreSliders();
             this.createStages();
@@ -49,7 +61,7 @@
             this.setSize();
             this.setCurrIndex( 0 );
             this.triggerSelectItem( this.index );
-            this.setInitalHeight();
+            this.setInitialHeight();
         },
 
         getPrefixed: function( prop ) {
@@ -72,19 +84,13 @@
         has3d: function() {
             var el = document.createElement( 'p' ),
                 has3d,
-                transforms = {
-                    'webkitTransform': '-webkit-transform',
-                    'OTransform': '-o-transform',
-                    'msTransform': '-ms-transform',
-                    'MozTransform': '-moz-transform',
-                    'transform': 'transform'
-                };
+                transforms = this.options.transforms;
 
             document.body.insertBefore( el, null );
 
             for ( var t in transforms ) {
                 if ( el.style[ t ] !== undefined ) {
-                    el.style[ t ] = 'translate3d(1px,1px,1px)';
+                    el.style[ t ] = 'translate3d( 1px, 1px, 1px )';
                     has3d = window.getComputedStyle( el ).getPropertyValue( transforms[ t ] );
                 }
             }
@@ -105,16 +111,10 @@
         bindTransitionEnd: function( $el ) {
             var elData = $el.data();
 
-            if ( elData.tEnd ) return;
+            if ( elData.tEnd ) { return; }
 
             var el = $el[ 0 ],
-                transitionEndEvent = {
-                    WebkitTransition: 'webkitTransitionEnd',
-                    MozTransition: 'transitionend',
-                    OTransition: 'oTransitionEnd otransitionend',
-                    msTransition: 'MSTransitionEnd',
-                    transition: 'transitionend'
-                };
+                transitionEndEvent = this.options.transitionEnd;
 
             this.addEvent( el, transitionEndEvent[ this.getPrefixed( 'transition' ) ], function( e ) {
                 elData.tProp && e.propertyName.match( elData.tProp ) && elData.onEndFn();
@@ -129,9 +129,7 @@
 
             if ( elData ) {
                 elData.onEndFn = function() {
-                    if ( ok ) {
-                        return;
-                    }
+                    if ( ok ) { return; }
                     ok = true;
                     clearTimeout( elData.tT );
                     fn();
@@ -149,17 +147,19 @@
 
         cacheObjects: function( $el, options ) {
             this.stages       = { prev: 0, curr: 0, next: 0 };
-            this.$activeThumb = $( {} );
+            this.$activeDot  = $( {} );
             this.options      = $.extend( {}, defaults, options );
-            this.isAnimated   = false;
+            this.isMoved      = false;
             this.$activeSlide = null;
             this.$nullBox     = $( '<div>' );
-            this.$thumbBox    = $( {} );
+            this.$dotsBox     = $( {} );
             this.$el          = $el;
             this.$els         = $el.find( '.' + this.options.item );
             this.$inner       = $el.find( '.' + this.options.inner );
             this.$navNext     = $el.find( '.' + this.options.navNext );
             this.$navPrev     = $el.find( '.' + this.options.navPrev );
+            this.transform    = this.getPrefixed( 'transform' );
+            this.has3d        = this.has3d();
         },
 
         disableSelection: function() {
@@ -175,7 +175,7 @@
             this.disableSelection( this.$el[ 0 ] );
 
             if ( this.$els.length > 1 ) {
-                this.$thumbBox.on( 'click', '.' + this.options.thumb + ':not(.active)', this.onThumbClick.bind( this ) );
+                this.$dotsBox.on( 'click', '.' + this.options.dot + ':not(.' + this.options.dotCurrent + ')', this.onDotClick.bind( this ) );
                 this.$el.on( 'mouseenter', this.onMouseEnter.bind( this ) );
                 this.$el.on( 'mouseleave', this.onMouseLeave.bind( this ) );
                 this.$navNext.click( this.onClickNext.bind( this ) );
@@ -187,10 +187,10 @@
             }
         },
 
-        initThumbs: function() {
-            if ( this.$els.length > 1 && this.options.useThumbs ) {
-                this.createThumbs();
-                this.setActiveThumb( 0 );
+        initDots: function() {
+            if ( this.$els.length > 1 && this.options.useDots ) {
+                this.createDots();
+                this.setActiveDot( 0 );
                 this.startTimeout();
             }
         },
@@ -245,7 +245,7 @@
                 this.setCurrIndex( this.index + 1 );
                 this.triggerSelectItem( this.index );
                 this.move( this.index, 1 );
-                this.setActiveThumb( this.index );
+                this.setActiveDot( this.index );
                 this.startTimeout();
             }.bind( this ), this.options.slideTimeout );
         },
@@ -259,11 +259,12 @@
 
         onResize: function() {
             this.setSize();
-            this.setInitalHeight();
+            this.setInitialHeight();
         },
 
         setSize: function() {
             this.trackerWidth = this.$el.width();
+            this.preContainerCenter = this.trackerWidth / 2 - this.options.preContainerOffset / 2;
             this.$tracker.width( this.trackerWidth );
             this.$els.width( this.trackerWidth );
             this.$preSliders.width( this.trackerWidth );
@@ -283,7 +284,7 @@
 
                 this.$activeSlide && this.$activeSlide.hide();
                 this.$activeSlide = this.$preSliders.eq( this.getPrevIndex() );
-                this.$activeSlide.show().css( { left: - ( this.trackerWidth / 2 - this.options.preContainerOffset / 2 ) } );
+                this.$activeSlide.show().css( { left: - this.preContainerCenter } );
             }
         },
 
@@ -308,7 +309,7 @@
 
                 this.$activeSlide && this.$activeSlide.hide();
                 this.$activeSlide = this.$preSliders.eq( this.getNextIndex() );
-                this.$activeSlide.show().css( { left: - ( this.trackerWidth / 2 - 64 ) } );
+                this.$activeSlide.show().css( { left: - this.preContainerCenter } );
             }
         },
 
@@ -363,23 +364,23 @@
             this.$tracker.find( '.' + this.options.item ).appendTo( this.$nullBox );
             if ( this.has3d ) {
                 this.$tracker.removeClass( this.options.transition );
-                this.$tracker[ 0 ].style[ this.getPrefixed( 'transform' ) ] = 'translateX(0)';
+                this.$tracker[ 0 ].style[ this.transform ] = 'translateX(0)';
             } else {
                 this.$tracker.removeClass( this.options.transition ).css( { left: 0 } );
             }
             this.setStage();
-            this.isAnimated = false;
+            this.isMoved = false;
         },
 
         moveByNav: function( direction ) {
-            if ( this.isAnimated ) {
+            if ( this.isMoved ) {
                 return;
             }
 
             this.setCurrIndex( this.index + direction );
             this.triggerSelectItem( this.index );
             this.move( this.index, direction );
-            this.setActiveThumb( this.index );
+            this.setActiveDot( this.index );
         },
 
         onMouseEnter: function() {
@@ -390,8 +391,8 @@
             this.startTimeout();
         },
 
-        onThumbClick: function( e ) {
-            var newIndex = this.$thumbEls.index( $( e.target ) ),
+        onDotClick: function( e ) {
+            var newIndex = this.$dotsEls.index( $( e.target ).closest( '.' + this.options.dot ) ),
                 direction = this.index - newIndex > 0 ? - 1 : 1;
 
             this.setCurrIndex( newIndex );
@@ -405,19 +406,19 @@
             }
 
             this.move( this.index, direction );
-            this.setActiveThumb( this.index );
+            this.setActiveDot( this.index );
         },
 
         move: function( to, direction ) {
-            this.isAnimated = true;
+            this.isMoved = true;
             var directionName = this.$preContainer.data( 'move' ), props = {};
             props[ directionName ] = - this.options.preContainerOffset;
             this.$preContainer.animate( props, this.options.preAnimationTime );
 
             if ( this.has3d ) {
                 this.$tracker.addClass( this.options.transition );
-                this.$tracker[ 0 ].style[ this.getPrefixed( 'transform' ) ] = 'translateX(' + - direction * this.trackerWidth + 'px)';
-                this.afterTransition( this.$tracker, 'transition', this.options.moveTime, function() {
+                this.$tracker[ 0 ].style[ this.transform ] = 'translateX(' + ( - direction * this.trackerWidth ) + 'px)';
+                this.afterTransition( this.$tracker, 'transform', this.options.moveTime, function() {
                     this.onMoveEnd();
                     console.log( 'transitionEnd' );
                 }.bind( this ));
@@ -432,34 +433,30 @@
             }
         },
 
-        setInitalHeight: function () {
+        setInitialHeight: function () {
             this.$inner.height( this.$el.height() );
         },
 
-        setActiveThumb: function( index ) {
-            if ( this.options.useThumbs ) {
-                this.$activeThumb.removeClass( 'active' );
-                this.$activeThumb = this.$thumbEls.eq( index ).addClass( 'active' );
+        setActiveDot: function( index ) {
+            if ( this.options.useDots ) {
+                this.$activeDot.removeClass( this.options.dotCurrent );
+                this.$activeDot = this.$dotsEls.eq( index ).addClass( this.options.dotCurrent );
             }
         },
 
-        createThumbs: function() {
-            var fragment = document.createDocumentFragment(), thumb;
-            this.$thumbBox = $( '<div>' ).addClass( this.options.thumbs );
+        createDots: function() {
+            var fragment = document.createDocumentFragment(), dots;
+            this.$dotsBox = $( '<ul>' ).addClass( this.options.dots );
             for ( var i = 0, ilen = this.$els.length; i < ilen; i++ ) {
-                thumb = $( '<div>' ).addClass( this.options.thumb );
-                fragment.appendChild( thumb[ 0 ] );
+                dots = $( '<li>' ).addClass( this.options.dot ).append( '<i></i>' );
+                fragment.appendChild( dots[ 0 ] );
             }
-            this.$thumbBox[ 0 ].appendChild( fragment );
-            this.$thumbEls = this.$thumbBox.find( '.' + this.options.thumb );
-            this.$el.append( this.$thumbBox );
-        },
-
-        getMaxHeight: function() {
-            this.maxheight = 0;
-            this.$els.get().forEach( function( item ) {
-                this.maxheight = Math.max( $( item ).height(), this.maxheight );
-            }, this );
+            this.$dotsBox[ 0 ].appendChild( fragment );
+            this.$dotsEls = this.$dotsBox.find( '.' + this.options.dot );
+            this.$el.append( this.$dotsBox );
+            this.$dotsBox.width( this.$dotsBox.width() );
+            this.$dotsEls.eq( 0 ).addClass( this.options.dotCurrent );
+            this.$dotsBox.css( 'marginLeft', - this.$dotsBox.width() / 2 );
         },
 
         destroy: function() {
