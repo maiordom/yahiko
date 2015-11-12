@@ -66,6 +66,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(Yahiko, [{
+            key: 'cacheObjects',
+            value: function cacheObjects($el, options) {
+                this.stages = {
+                    prev: 0,
+                    curr: 0,
+                    next: 0
+                };
+                this.$activeDot = $({});
+                this.options = $.extend({}, defaults, options);
+                this.isMoved = false;
+                this.$activeSlide = null;
+                this.$nullBox = $('<div>');
+                this.$dotsBox = $({});
+                this.$el = $el;
+                this.$els = $el.find('.' + this.options.item);
+                this.$inner = $el.find('.' + this.options.inner);
+                this.$navNext = $el.find('.' + this.options.navNext);
+                this.$navPrev = $el.find('.' + this.options.navPrev);
+                this.transform = this.getPrefixed('transform');
+                this.has3d = this.has3d();
+            }
+        }, {
             key: 'getPrefixed',
             value: function getPrefixed(prop) {
                 var elemStyle = document.createElement('p').style;
@@ -159,28 +181,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                     this.bindTransitionEnd($el);
                 }
-            }
-        }, {
-            key: 'cacheObjects',
-            value: function cacheObjects($el, options) {
-                this.stages = {
-                    prev: 0,
-                    curr: 0,
-                    next: 0
-                };
-                this.$activeDot = $({});
-                this.options = $.extend({}, defaults, options);
-                this.isMoved = false;
-                this.$activeSlide = null;
-                this.$nullBox = $('<div>');
-                this.$dotsBox = $({});
-                this.$el = $el;
-                this.$els = $el.find('.' + this.options.item);
-                this.$inner = $el.find('.' + this.options.inner);
-                this.$navNext = $el.find('.' + this.options.navNext);
-                this.$navPrev = $el.find('.' + this.options.navPrev);
-                this.transform = this.getPrefixed('transform');
-                this.has3d = this.has3d();
             }
         }, {
             key: 'disableSelection',
