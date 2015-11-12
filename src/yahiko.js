@@ -3,7 +3,7 @@
 
     const namespace = 'yahiko';
 
-    let defaults = {
+    const defaults = {
         loop: false,
         useDots: false,
         useTimer: false,
@@ -55,6 +55,27 @@
             this.setCurrIndex(0);
             this.triggerSelectItem(this.index);
             this.setInitialHeight();
+        }
+
+        cacheObjects($el, options) {
+            this.stages = {
+                prev: 0,
+                curr: 0,
+                next: 0
+            };
+            this.$activeDot = $({});
+            this.options = $.extend({}, defaults, options);
+            this.isMoved = false;
+            this.$activeSlide = null;
+            this.$nullBox = $('<div>');
+            this.$dotsBox = $({});
+            this.$el = $el;
+            this.$els = $el.find('.' + this.options.item);
+            this.$inner = $el.find('.' + this.options.inner);
+            this.$navNext = $el.find('.' + this.options.navNext);
+            this.$navPrev = $el.find('.' + this.options.navPrev);
+            this.transform = this.getPrefixed('transform');
+            this.has3d = this.has3d();
         }
 
         getPrefixed(prop) {
@@ -115,7 +136,7 @@
             let el = $el[0];
             let transitionEndEvent = this.options.transitionEnd;
 
-            this.addEvent(el, transitionEndEvent[this.getPrefixed('transition')], (e) => {
+            this.addEvent(el, transitionEndEvent[this.getPrefixed('transition')], e => {
                 elData.tProp && e.propertyName.match(elData.tProp) && elData.onEndFn();
             });
 
@@ -145,27 +166,6 @@
 
                 this.bindTransitionEnd($el);
             }
-        }
-
-        cacheObjects($el, options) {
-            this.stages = {
-                prev: 0,
-                curr: 0,
-                next: 0
-            };
-            this.$activeDot = $({});
-            this.options = $.extend({}, defaults, options);
-            this.isMoved = false;
-            this.$activeSlide = null;
-            this.$nullBox = $('<div>');
-            this.$dotsBox = $({});
-            this.$el = $el;
-            this.$els = $el.find('.' + this.options.item);
-            this.$inner = $el.find('.' + this.options.inner);
-            this.$navNext = $el.find('.' + this.options.navNext);
-            this.$navPrev = $el.find('.' + this.options.navPrev);
-            this.transform = this.getPrefixed('transform');
-            this.has3d = this.has3d();
         }
 
         disableSelection() {

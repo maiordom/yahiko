@@ -10,14 +10,12 @@ const nib = require('nib');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const minifyCss = require('gulp-minify-css');
-const sourceMaps = require('gulp-sourcemaps');
 
 const config = require('./package.json');
 
 let handlers = {
     server() {
         connect.server({
-            root: './demo',
             port: 8089
         });
     },
@@ -28,7 +26,6 @@ let handlers = {
                 presets: ['es2015']
             }))
             .pipe(gulp.dest('./dist'))
-            .pipe(gulp.dest('./demo'));
     },
 
     stylus() {
@@ -40,30 +37,25 @@ let handlers = {
                 browsers: ['last 2 versions']
             }))
             .pipe(gulp.dest('./dist'))
-            .pipe(gulp.dest('./demo'));
     },
 
-    buildJs() {
+    minJs() {
         gulp.src(`./dist/${config.name}.js`)
-            .pipe(sourceMaps.init())
             .pipe(uglify())
-            .pipe(sourceMaps.write())
             .pipe(rename(`${config.name}.min.js`))
             .pipe(gulp.dest('./dist'));
     },
 
-    buildCSS() {
+    minCSS() {
         gulp.src(`./dist/${config.name}.css`)
-            .pipe(sourceMaps.init())
             .pipe(minifyCss())
-            .pipe(sourceMaps.write())
             .pipe(rename(`${config.name}.min.css`))
             .pipe(gulp.dest('./dist'));
     },
 
     build() {
-        handlers.buildJs();
-        handlers.buildCSS();
+        handlers.minJs();
+        handlers.minCSS();
     },
 
     watch() {
