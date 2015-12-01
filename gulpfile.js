@@ -10,69 +10,63 @@ const nib = require('nib');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const minifyCss = require('gulp-minify-css');
+const runSequence = require('run-sequence');
 
 const config = require('./package.json');
 
-let handlers = {
-    server() {
-        connect.server({
-            port: 8089
-        });
-    },
+gulp.task('server', () => {
+    return connect.server({
+        port: 3001,
+        root: [__dirname]
+    });
+});
 
-    babel() {
-        gulp.src('./src/*.js')
-            .pipe(babel({
-                presets: ['es2015']
-            }))
-            .pipe(gulp.dest('./dist'))
-    },
+gulp.task('babel', () => {
+    return gulp.src('./src/*.js')
+        .pipe(babel({
+            presets: ['es2015']
+        }))
+        .pipe(gulp.dest('./dist'));
+});
 
-    stylus() {
-        gulp.src('./src/*.styl')
-            .pipe(stylus({
-                use: [nib()]
-            }))
-            .pipe(autoprefixer({
-                browsers: ['last 2 versions']
-            }))
-            .pipe(gulp.dest('./dist'))
-    },
+gulp.task('stylus', () => {
+    return gulp.src('./src/*.styl')
+        .pipe(stylus({
+            use: [nib()]
+        }))
+        .pipe(autoprefixer({
+            browsers: ['last 2 versions']
+        }))
+        .pipe(gulp.dest('./dist'))
+        .pipe(connect.reload());
+});
 
-    minJs() {
-        gulp.src(`./dist/${config.name}.js`)
-            .pipe(uglify())
-            .pipe(rename(`${config.name}.min.js`))
-            .pipe(gulp.dest('./dist'));
-    },
+gulp.task('min-js', () => {
+    return gulp.src(`./dist/${config.name}.js`)
+        .pipe(uglify())
+        .pipe(rename(`${config.name}.min.js`))
+        .pipe(gulp.dest('./dist'));
+});
 
-    minCSS() {
-        gulp.src(`./dist/${config.name}.css`)
-            .pipe(minifyCss())
-            .pipe(rename(`${config.name}.min.css`))
-            .pipe(gulp.dest('./dist'));
-    },
+gulp.task('min-css', () => {
+    return gulp.src(`./dist/${config.name}.css`)
+        .pipe(minifyCss())
+        .pipe(rename(`${config.name}.min.css`))
+        .pipe(gulp.dest('./dist'));
+});
 
-    build() {
-        handlers.minJs();
-        handlers.minCSS();
-    },
+gulp.task('build', () => {
+    return runSequence('min-js', 'min-css');
+});
 
-    watch() {
-        watch('./src/*.js', () => {
-            handlers.babel();
-        });
+gulp.task('watch', () => {
+    watch('./src/*.js', () => {
+        runSequence('babel');
+    });
 
-        watch('./src/*.styl', () => {
-            handlers.stylus();
-        });
-    }
-};
+    watch('./src/*.styl', () => {
+        runSequence('stylus');
+    });
+});
 
-gulp
-    .task('server', handlers.server)
-    .task('babel', handlers.babel)
-    .task('stylus', handlers.stylus)
-    .task('build', handlers.build)
-    .task('watch', handlers.watch)
-    .task('default', ['server', 'watch', 'babel', 'stylus']);
+gulp.task('default', ['server', 'watch', 'babel', 'stylus']);

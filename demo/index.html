@@ -44,9 +44,15 @@
 
 <script type="text/javascript">
     (function($) {
-        $('.yahiko').Yahiko({
+        var options = {
             useDots: true
-        });
+        };
+
+        if (location.href.indexOf('loop=true') !== -1) {
+            options.loop = true;
+        }
+
+        $('.yahiko').Yahiko(options);
     })(jQuery, window, undefined);
 </script>
 

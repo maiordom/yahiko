@@ -93,7 +93,6 @@
   left: 0;
 }
 .yahiko__paginate {
-  margin: 10px a;
   width: 50px;
   height: 50px;
   cursor: pointer;
@@ -107,7 +106,7 @@
   transform: translate3d(0, 0, 0);
   position: absolute;
   top: 50%;
-  margin-top: -20px;
+  margin-top: -25px;
 }
 .yahiko__paginate i {
   position: absolute;
